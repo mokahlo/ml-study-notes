@@ -359,11 +359,21 @@
                 codeTimestamp = Date.now();
                 currentEmail = email;
 
-                // Send code via email (simulated - you'd use a service like SendGrid)
-                console.log(`📧 Verification code for ${email}: ${generatedCode}`);
-                
-                // For testing, show code in console
-                showToast(`Code: ${generatedCode} (check console - in production this goes to email)`);
+                // Send code via email using Formspree
+                const sendEmailResponse = await fetch('https://formspree.io/f/xyzabjpo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        code: generatedCode,
+                        message: `Your CEE 501 Study App verification code is: ${generatedCode}\n\nCode expires in 5 minutes.\n\nDo not share this code with anyone.`
+                    })
+                });
+
+                console.log(`📧 Code sent to ${email}: ${generatedCode}`);
+                showToast(`✓ Verification code sent to ${email}`);
 
                 // Move to step 2
                 document.getElementById('step1').classList.remove('active');
@@ -514,7 +524,8 @@
         // ===== UTILITIES =====
         function showToast(message) {
             console.log('🔐 ' + message);
-            // In production, would show actual toast notification
+            // Show as alert for now
+            alert(message);
         }
 
         // Allow Enter key to submit
