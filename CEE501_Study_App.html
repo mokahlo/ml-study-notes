@@ -316,6 +316,26 @@
             background: #4b5563;
         }
 
+        .btn-export {
+            background: #3b82f6;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-export:hover {
+            background: #2563eb;
+        }
+
+        .btn-import {
+            background: #8b5cf6;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-import:hover {
+            background: #7c3aed;
+        }
+
         .navigation {
             display: flex;
             gap: 10px;
@@ -524,7 +544,14 @@
                     <button class="filter-btn" onclick="filterProblems('unanswered')">Unanswered</button>
                 </div>
 
-                <h3>Sections</h3>
+                <h3 style="margin-top: 30px;">Backup & Restore</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn btn-export" onclick="exportProgress()" style="font-size: 0.85em; padding: 10px 12px;">📥 Export Progress</button>
+                    <button class="btn btn-import" onclick="importProgress()" style="font-size: 0.85em; padding: 10px 12px;">📤 Import Progress</button>
+                </div>
+                <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleFileImport(event)">
+
+                <h3 style="margin-top: 30px;">Sections</h3>
                 <div class="current-section" id="currentSection">Section 1</div>
                 <ul class="section-list" id="sectionList"></ul>
             </div>
@@ -959,6 +986,59 @@
             };
             localStorage.setItem('cee501_progress', JSON.stringify(data));
             showToast('Progress saved!');
+        }
+
+        // Export progress to JSON file
+        function exportProgress() {
+            const data = {
+                stats: problemStats,
+                flagged: Array.from(flaggedProblems),
+                exportedDate: new Date().toLocaleString()
+            };
+            const jsonString = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cee501_progress_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Progress exported! Check your downloads.');
+        }
+
+        // Import progress from JSON file
+        function importProgress() {
+            document.getElementById('importFile').click();
+        }
+
+        // Handle file import
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.stats && data.flagged) {
+                        problemStats = data.stats;
+                        flaggedProblems = new Set(data.flagged);
+                        saveProgress();
+                        updateView();
+                        showToast('✅ Progress imported successfully!');
+                    } else {
+                        showToast('❌ Invalid file format');
+                    }
+                } catch (error) {
+                    showToast('❌ Error reading file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
         }
 
         // Show toast notification
