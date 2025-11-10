@@ -46,17 +46,44 @@
 
         .progress-bar {
             width: 100%;
-            height: 10px;
+            height: 40px;
             background: rgba(255, 255, 255, 0.3);
             margin-top: 20px;
             border-radius: 10px;
             overflow: hidden;
+            position: relative;
         }
 
         .progress-fill {
             height: 100%;
             background: #4ade80;
             transition: width 0.3s ease;
+        }
+
+        .progress-info {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .progress-goal {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px dashed rgba(255, 255, 255, 0.5);
+            position: absolute;
+            height: 100%;
+            transition: left 0.3s ease;
         }
 
         .main-content {
@@ -520,7 +547,12 @@
             <h1>📚 CEE 501 Study Companion</h1>
             <p>Midterm 2 Exam Preparation - 230 Practice Problems</p>
             <div class="progress-bar">
+                <div class="progress-goal" id="goalMarker"></div>
                 <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-info">
+                    <span id="progressText">0 / 230</span>
+                    <span id="goalText">Today's Goal: 0</span>
+                </div>
             </div>
         </div>
 
@@ -1133,6 +1165,27 @@
             updateView();
         }
 
+        // Calculate study plan goal
+        function calculateStudyGoal() {
+            // Study plan: Sun 54 → Mon 54 → Tue 54 → Wed 54 → Thu practice → Fri review
+            // Starting from problem 16 (Sunday)
+            const studyPlan = {
+                0: { day: 'Sunday', goal: 54 },      // Already at 16, need 54 total = 38 more
+                1: { day: 'Monday', goal: 108 },     // 54 + 54
+                2: { day: 'Tuesday', goal: 162 },    // 108 + 54
+                3: { day: 'Wednesday', goal: 216 },  // 162 + 54
+                4: { day: 'Thursday', goal: 216 },   // Practice test day
+                5: { day: 'Friday', goal: 230 }      // Review/remaining
+            };
+
+            // Get current day of week (0 = Sunday, 6 = Saturday)
+            const today = new Date().getDay();
+            const daysUntilExam = (5 - today + 7) % 7 || 7; // Days until Friday
+            
+            // Return plan for today
+            return studyPlan[today] || { day: 'Today', goal: 230 };
+        }
+
         // Update view
         function updateView() {
             if (filteredProblems.length === 0) {
@@ -1159,8 +1212,30 @@
             document.getElementById('nextBtn').disabled = currentIndex === filteredProblems.length - 1;
 
             // Update progress bar
-            const progress = (Object.values(problemStats).filter(s => s.status !== 'unanswered').length / problems.length) * 100;
+            const attemptedCount = Object.values(problemStats).filter(s => s.status !== 'unanswered').length;
+            const progress = (attemptedCount / problems.length) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
+
+            // Update progress text
+            document.getElementById('progressText').textContent = `${attemptedCount} / 230`;
+
+            // Update goal marker and text
+            const goal = calculateStudyGoal();
+            const goalProgress = (goal.goal / problems.length) * 100;
+            document.getElementById('goalMarker').style.left = goalProgress + '%';
+            document.getElementById('goalMarker').style.width = '2px';
+            
+            // Change color based on progress
+            if (attemptedCount >= goal.goal) {
+                document.getElementById('goalMarker').style.background = '#4ade80';
+                document.getElementById('goalMarker').style.borderColor = '#4ade80';
+                document.getElementById('goalText').textContent = `✅ ${goal.day}'s Goal: ${goal.goal} (Completed!)`;
+            } else {
+                const remaining = goal.goal - attemptedCount;
+                document.getElementById('goalMarker').style.background = '#fbbf24';
+                document.getElementById('goalMarker').style.borderColor = '#fbbf24';
+                document.getElementById('goalText').textContent = `${goal.day}: ${remaining} more of ${goal.goal}`;
+            }
         }
 
         // Update statistics
