@@ -1,0 +1,56 @@
+# ⚡ QUICK GITHUB PAGES SETUP (5 mins)
+
+## TL;DR - Do This Now:
+
+1. Go to **github.com** → Sign up/login
+2. Click **+** → **New repository**
+3. Name: `cee501-study`
+4. Select **Private** ✅
+5. **Create repository**
+6. Click **Add file** → **Upload files**
+7. Drag `CEE501_Study_App.html` → **Commit changes**
+8. Click **Settings** → Scroll to **Pages**
+9. **Branch:** main, **Folder:** / (root) → **Save**
+10. Wait 1-2 minutes
+11. Copy the URL shown in Pages: `https://yourusername.github.io/cee501-study/CEE501_Study_App.html`
+12. Open on phone → Bookmark!
+
+## That's it! You're done! 🎉
+
+Your private study app is now online and accessible from anywhere!
+
+---
+
+## FAQ
+
+**Q: Can anyone see my study app?**
+A: No! It's in a private repo. Only you can access it.
+
+**Q: Will my progress sync between devices?**
+A: No, each device stores progress separately. This is a browser limitation.
+
+**Q: Can I update the app?**
+A: Yes! Go to repo → Edit file → Commit. It updates in ~1 minute.
+
+**Q: Do I need internet to study?**
+A: The app loads online, but once loaded, it works offline!
+
+**Q: How do I share with a study partner?**
+A: Make repo public, or add them as a collaborator in Settings.
+
+---
+
+## Your Study App URL Structure
+
+```
+https://yourusername.github.io/cee501-study/CEE501_Study_App.html
+                      ↑                          ↑
+                   your github          repository name
+                   username
+```
+
+Replace `yourusername` with your actual GitHub username!
+
+---
+
+Need help? Let me know!

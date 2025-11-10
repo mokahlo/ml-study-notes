@@ -1,0 +1,79 @@
+```txt
+***
+MIDTERM CHEAT SHEET (FRONT SIDE)
+Based on Sample Midterm Exam Questions
+***
+
+I. NEURAL NETWORK FUNDAMENTALS (Q1)
+-----------------------------------------
+A. Linear Calculation:
+    z = w * x + b
+B. Sigmoid Activation:
+    ŷ = f(z) = 1 / (1 + e^(-z))
+    *Output Range: (0, 1)*
+C. Squared Loss:
+    J = 1/2 * (ŷ - y)^2
+
+II. CNN DIMENSIONS AND PARAMETERS (Q2)
+----------------------------------------------
+A. Output Feature Map Size (Convolution/Pooling):
+    Output Size = [(Input Size - Filter Size + 2*Padding) / Stride] + 1
+    *Example Q2.1: Input 6x6, Filter 3x3, Stride=2, Padding=0.*
+B. Learnable Parameters (Q2.3, using 3 filters):
+    Total Params = (Filter H * Filter W * Input Depth + 1 bias) * Number of Filters
+
+III. SVM DECISION BOUNDARY (Q4)
+------------------------------------
+A. Separating Hyperplane (Example):
+    f(x) = 3*x1 - 4*x2 + 2
+B. Classification Rule:
+    If f(x) > 0, point is on the POSITIVE side.
+    If f(x) < 0, point is on the NEGATIVE side.
+
+IV. DECISION TREE ENTROPY (Q5)
+--------------------------------------
+A. Entropy Formula (Base 2):
+    E = -sum( p_i * log2(p_i) )
+    *Example Counts: Yes=6, No=2 (Initial).*
+    *Example Split: Weak (Y=4, N=1), Strong (Y=2, N=1).*
+B. Purity Rule:
+    The branch with the LOWER entropy is PURER.
+
+V. CNN STEP-BY-STEP CALCULATION (Q8)
+-------------------------------------------
+A. Computation Rule:
+    Output Value = SUM(K[i,j] * X[i,j]) + bias (b)
+B. Specifics:
+    Input X (4x4), Kernel K (2x2).
+    Stride = 2, No Padding, Bias b = 1.
+    *Remember: Stride=2 means filter moves 2 positions right/down.*
+
+
+***
+MIDTERM CHEAT SHEET (BACK SIDE)
+Concept Checks and Definitions
+***
+
+VI. PCA AND SCALING CONCEPTS (Q3, Q6.3)
+---------------------------------------------
+A. Principal Component (PC) Variance (T/F Q6.3):
+    The first principal component captures the direction of **maximum variance** in the data. (TRUE)
+B. Influence of Scaling (Q3.1):
+    Without scaling, the feature with the **largest range** (or variance, e.g., Energy use ) will **most strongly influence** the first PC.
+
+VII. OPTIMIZATION AND CNN RULES (Q6)
+-----------------------------------------
+A. Learning Rate (T/F Q6.4):
+    Gradient descent can converge faster with a larger learning rate, but may **overshoot the minimum**. (TRUE)
+B. Sigmoid Output (T/F Q6.2):
+    Sigmoid activation outputs values between **0 and 1**. (Statement claiming [-1, 1] is FALSE)
+C. Filter Count vs. Depth (T/F Q6.1):
+    Increasing the number of filters in a CNN layer **INCREASES** the feature map depth. (Statement claiming it decreases depth is FALSE)
+
+VIII. TRANSFORMERS (Q7)
+--------------------------
+A. Attention Mechanism (Q7.1):
+    The main purpose is to **weigh the importance of different parts of the input** (e.g., tokens) relative to the current token being processed.
+B. Feed-Forward Network (FFN) (Q7.2):
+    The role of the FFN layer is to **apply a non-linear transformation** to the output of the attention layer.
+```

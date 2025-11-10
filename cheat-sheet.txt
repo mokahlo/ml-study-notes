@@ -1,0 +1,104 @@
+```txt
+***
+MIDTERM CHEAT SHEET (FRONT SIDE)
+Based on Sample Midterm Exam Questions
+***
+
+I. NEURAL NETWORK FUNDAMENTALS (Q1)
+-----------------------------------------
+hidden layers: 784 -> 128 -> 64 -> 10 Input: 784, Output: 10, therefore 2 hidden layers (128, 64)
+number of parameters (weights) between input and first hidden layer: Input layer x 1st hidden layer + Hidden layer
+Role of hidden layers: Extract and transform features from input data; introduce nonlinearity and complexity.
+
+Activation, Formula, Output Range, Typical Use,
+ Advantages, Disadvantages, Hidden Layer, Output Layer
+    Sigmoid, f(x) = 1 / (1 + e^(-x)), (0, 1), Binary classification output,
+     Smooth probabilistic output, suffers from vanishing gradients and non-zero centered output, Rarely used (sometimes for gates), Yes (binary classification)
+    tanh, f(x) = tanh(x) = (e^(x) − e^(−x)) / (e^(x) + e^(−x)), (−1, 1), Hidden layers (legacy networks),
+     Zero-centered and stronger gradients than sigmoid, still suffers from vanishing gradients, Yes , No
+    ReLU, f(x) = max(0, x), [0, ∞), Hidden layers (default choice),
+     Fast and simple with sparse activations, can cause “dead neurons”, Yes (deep networks), No
+    Leaky ReLU, f(x) = x if x > 0; 0.01x otherwise, (−∞, ∞), Hidden layers (avoids dead ReLUs),
+     Keeps small gradients for negative x, requires tuning the leak parameter, Yes, No
+    Softmax, f_i(x) = e^(x_i) / Σ_j e^(x_j), (0, 1) sum=1, Multi-class classification output,
+     Converts scores to probabilities, can be numerically unstable for large values, No, Yes (multi-class output)
+    Linear (Identity), f(x) = x, (−∞, ∞), Regression output,
+     Allows unrestricted output range, provides no nonlinearity on its own, No, Yes (regression output)
+
+Loss Function: measures how far predictions are from the target, drives backpropagation.
+    Loss, Formula, Output Type, Typical Task
+    Mean Squared Error (MSE), L = (1/n)∑(y−ŷ)², Continuous, Regression
+    Mean Absolute Error (MAE), L = (1/n)∑|y−ŷ|, Continuous, Regression (robust to outliers)
+    Huber Loss, L = 0.5(y−ŷ)² if |y−ŷ| ≤ δ else δ(|y−ŷ|−0.5δ), Continuous, Regression (combines MSE + MAE)
+    Binary Cross Entropy (Log Loss), L = −(1/n)∑[y log(ŷ) + (1−y)log(1−ŷ)], Probability (0–1), Binary classification
+    Categorical Cross Entropy, L = −∑ y_i log(ŷ_i), Probability distribution (sum=1), Multi-class classification
+    Sparse Categorical Cross-Entropy, Same as categorical but y are integer class indices, Integer class labels, Multi-class classification (integer targets)
+    Kullback-Leibler Divergence (KLDiv), L = ∑ y_i log(y_i / ŷ_i), Probability distributions, Probabilistic modeling or comparing distributions
+    Hinge Loss, L = max(0, 1−y·ŷ), Signed class scores (y ∈ {−1,+1}), Binary classification (e.g., SVMs)
+    Poisson / Log Loss, L = ŷ − y log(ŷ), Positive continuous or count, Count-based regression (e.g., events per time)
+
+Neuron Base Formula: a^(l)=f(W^(l)a^(l−1)+b^(l))
+
+II. CNN DIMENSIONS AND PARAMETERS (Q2)
+----------------------------------------------
+A. Output Feature Map Size (Convolution/Pooling):
+    Output Size = [(Input Size - Filter Size + 2*Padding) / Stride] + 1
+    *Example Q2.1: Input 6x6, Filter 3x3, Stride=2, Padding=0.*
+B. Learnable Parameters (Q2.3, using 3 filters):
+    Total Params = (Filter H * Filter W * Input Depth + 1 bias) * Number of Filters
+
+III. SVM DECISION BOUNDARY (Q4)
+------------------------------------
+A. Separating Hyperplane (Example):
+    f(x) = 3*x1 - 4*x2 + 2
+B. Classification Rule:
+    If f(x) > 0, point is on the POSITIVE side.
+    If f(x) < 0, point is on the NEGATIVE side.
+
+IV. DECISION TREE ENTROPY (Q5)
+--------------------------------------
+A. Entropy Formula (Base 2):
+    E = -sum( p_i * log2(p_i) )
+    *Example Counts: Yes=6, No=2 (Initial).*
+    *Example Split: Weak (Y=4, N=1), Strong (Y=2, N=1).*
+B. Purity Rule:
+    The branch with the LOWER entropy is PURER.
+
+V. CNN STEP-BY-STEP CALCULATION (Q8)
+-------------------------------------------
+A. Computation Rule:
+    Output Value = SUM(K[i,j] * X[i,j]) + bias (b)
+B. Specifics:
+    Input X (4x4), Kernel K (2x2).
+    Stride = 2, No Padding, Bias b = 1.
+    *Remember: Stride=2 means filter moves 2 positions right/down.*
+
+
+***
+MIDTERM CHEAT SHEET (BACK SIDE)
+Concept Checks and Definitions
+***
+
+VI. PCA AND SCALING CONCEPTS (Q3, Q6.3)
+---------------------------------------------
+A. Principal Component (PC) Variance (T/F Q6.3):
+    The first principal component captures the direction of **maximum variance** in the data. (TRUE)
+B. Influence of Scaling (Q3.1):
+    Without scaling, the feature with the **largest range** (or variance, e.g., Energy use ) will **most strongly influence** the first PC.
+
+VII. OPTIMIZATION AND CNN RULES (Q6)
+-----------------------------------------
+A. Learning Rate (T/F Q6.4):
+    Gradient descent can converge faster with a larger learning rate, but may **overshoot the minimum**. (TRUE)
+B. Sigmoid Output (T/F Q6.2):
+    Sigmoid activation outputs values between **0 and 1**. (Statement claiming [-1, 1] is FALSE)
+C. Filter Count vs. Depth (T/F Q6.1):
+    Increasing the number of filters in a CNN layer **INCREASES** the feature map depth. (Statement claiming it decreases depth is FALSE)
+
+VIII. TRANSFORMERS (Q7)
+--------------------------
+A. Attention Mechanism (Q7.1):
+    The main purpose is to **weigh the importance of different parts of the input** (e.g., tokens) relative to the current token being processed.
+B. Feed-Forward Network (FFN) (Q7.2):
+    The role of the FFN layer is to **apply a non-linear transformation** to the output of the attention layer.
+```
