@@ -660,6 +660,22 @@
     </div>
 
     <script>
+        // Check 2FA authentication before loading app
+        (function() {
+            const token = sessionStorage.getItem('auth_token_2fa') || localStorage.getItem('auth_token_2fa');
+            if (token !== 'verified') {
+                window.location.href = 'LOGIN_2FA.html';
+            }
+            
+            // Check if 7-day token has expired
+            const expiry = localStorage.getItem('auth_expiry');
+            if (expiry && Date.now() > parseInt(expiry)) {
+                localStorage.removeItem('auth_token_2fa');
+                localStorage.removeItem('auth_expiry');
+                window.location.href = 'LOGIN_2FA.html';
+            }
+        })();
+
         // All 230 problems with solutions
         const problems = [
             // SECTION 1: NEURAL NETWORKS FUNDAMENTALS (40 Problems)

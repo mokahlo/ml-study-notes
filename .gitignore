@@ -6,3 +6,7 @@
 .vscode/
 node_modules/
 .env
+
+# Optional: Uncomment below to keep LOGIN.html private
+# (keep password-protection logic local, don't commit)
+# LOGIN.html
