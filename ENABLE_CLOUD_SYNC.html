@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enable Cloud Sync - CEE 501 Study App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .subtitle {
+            color: #999;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .status {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #f0fdf4;
+            border-color: #4ade80;
+            color: #22c55e;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #dc2626;
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .button-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-secondary {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .button-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #333;
+        }
+
+        .checkmark {
+            color: #4ade80;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>☁️ Cloud Sync Setup</h1>
+        <p class="subtitle">Enable seamless study progress sync</p>
+
+        <div class="status" id="status">
+            Initializing...
+        </div>
+
+        <button class="button button-primary" onclick="enableSync()">
+            Enable Cloud Sync Now
+        </button>
+
+        <button class="button button-secondary" onclick="goToStudyApp()">
+            Skip & Go to Study App
+        </button>
+
+        <div class="info-box">
+            <div><span class="checkmark">✓</span> <strong>What happens:</strong></div>
+            <ul style="margin-left: 28px;">
+                <li>Your study progress syncs between PC and phone</li>
+                <li>Changes sync automatically every 30 seconds</li>
+                <li>No manual save steps needed ever</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Token will be securely entered and stored in browser localStorage only
+        let TOKEN = localStorage.getItem('github_token');
+
+        async function enableSync() {
+            const statusEl = document.getElementById('status');
+            const btn = event.target;
+
+            try {
+                if (!TOKEN) {
+                    TOKEN = prompt('Enter your GitHub Personal Access Token:\n(from https://github.com/settings/tokens/new)\n\nToken: ');
+                    if (!TOKEN) {
+                        statusEl.innerHTML = 'Cancelled';
+                        statusEl.className = 'status';
+                        return;
+                    }
+                }
+
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading">⚙️</span> Enabling...';
+                statusEl.innerHTML = 'Verifying token...';
+                statusEl.className = 'status';
+
+                // Verify token works
+                const verify = await fetch('https://api.github.com/user', {
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!verify.ok) {
+                    throw new Error('Token verification failed - check your token');
+                }
+
+                const user = await verify.json();
+                console.log('✓ Token verified for user:', user.login);
+
+                // Store token (only in browser, never sent to server)
+                localStorage.setItem('github_token', TOKEN);
+                statusEl.innerHTML = '<span class="checkmark">✓</span> Cloud sync enabled! Redirecting...';
+                statusEl.className = 'status success';
+
+                // Redirect after 2 seconds
+                setTimeout(() => {
+                    window.location.href = 'CEE501_Study_App.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error:', error);
+                statusEl.innerHTML = '<span class="checkmark">✗</span> Error: ' + error.message;
+                statusEl.className = 'status error';
+                btn.disabled = false;
+                btn.innerHTML = 'Enable Cloud Sync Now';
+                TOKEN = null;
+            }
+        }
+
+        function goToStudyApp() {
+            window.location.href = 'CEE501_Study_App.html';
+        }
+
+        // Check if already enabled
+        window.addEventListener('load', () => {
+            if (TOKEN) {
+                document.getElementById('status').innerHTML = '<span class="checkmark">✓</span> Cloud sync already enabled!';
+                document.getElementById('status').className = 'status success';
+                document.querySelector('.button-primary').textContent = '✓ Already Enabled';
+                document.querySelector('.button-primary').disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>
