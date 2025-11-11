@@ -558,6 +558,11 @@
                     <span id="progressText">0 / 230</span>
                     <span id="goalText">Today's Goal: 0</span>
                 </div>
+                <h3 style="margin-top: 20px;">Quick Packs</h3>
+                <div style="display:flex; flex-direction:column; gap:8px; margin-bottom: 10px;">
+                    <button id="highYieldBtn" class="filter-btn" data-filter="highyield" onclick="loadHighYield()">⭐ High-Yield Pack</button>
+                    <button id="btnFullSet" class="filter-btn" data-filter="all" onclick="showAllProblems()">📚 Full Set</button>
+                </div>
             </div>
         </div>
 
@@ -583,11 +588,11 @@
 
                 <h3 style="margin-top: 30px;">Filters</h3>
                 <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filterProblems('all')">All Problems</button>
-                    <button class="filter-btn" onclick="filterProblems('flagged')">Flagged</button>
-                    <button class="filter-btn" onclick="filterProblems('failed')">Failed</button>
-                    <button class="filter-btn" onclick="filterProblems('passed')">Passed</button>
-                    <button class="filter-btn" onclick="filterProblems('unanswered')">Unanswered</button>
+                    <button class="filter-btn active" data-filter="all" onclick="filterProblems('all')">All Problems</button>
+                    <button class="filter-btn" data-filter="flagged" onclick="filterProblems('flagged')">Flagged</button>
+                    <button class="filter-btn" data-filter="failed" onclick="filterProblems('failed')">Failed</button>
+                    <button class="filter-btn" data-filter="passed" onclick="filterProblems('passed')">Passed</button>
+                    <button class="filter-btn" data-filter="unanswered" onclick="filterProblems('unanswered')">Unanswered</button>
                 </div>
 
                 <h3 style="margin-top: 30px;">Backup & Restore</h3>
@@ -1193,14 +1198,13 @@
         }
 
         // Filter problems
-        function filterProblems(filter) {
+    function filterProblems(filter) {
             currentFilter = filter;
 
             // Update button states
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            const clickedBtn = document.querySelector(`.filter-btn[data-filter="${filter}"]`);
+            if (clickedBtn) clickedBtn.classList.add('active');
 
             // Apply filter
             filteredProblems = problems.filter(p => {
@@ -1252,7 +1256,7 @@
             }
 
             const problem = filteredProblems[currentIndex];
-            document.getElementById('problemNumber').textContent = `Problem ${problem.id} of ${problems.length}`;
+            document.getElementById('problemNumber').textContent = `Problem ${currentIndex + 1} of ${filteredProblems.length}`;
             document.getElementById('problemTitle').textContent = problem.title;
             document.getElementById('problemContent').textContent = problem.content;
             document.getElementById('solutionContent').textContent = problem.solution;
@@ -1270,12 +1274,16 @@
             document.getElementById('nextBtn').disabled = currentIndex === filteredProblems.length - 1;
 
             // Update progress bar
-            const attemptedCount = Object.values(problemStats).filter(s => s.status !== 'unanswered').length;
-            const progress = (attemptedCount / problems.length) * 100;
+            const attemptedCount = filteredProblems.reduce((acc, p) => {
+                if (problemStats[p.id] && problemStats[p.id].status !== 'unanswered') return acc + 1;
+                return acc;
+            }, 0);
+            const totalCount = filteredProblems.length || problems.length;
+            const progress = (attemptedCount / totalCount) * 100;
             document.getElementById('progressFill').style.width = progress + '%';
 
             // Update progress text
-            document.getElementById('progressText').textContent = `${attemptedCount} / 230`;
+            document.getElementById('progressText').textContent = `${attemptedCount} / ${totalCount}`;
 
             // Update goal marker and text
             const goal = calculateStudyGoal();
@@ -1298,11 +1306,13 @@
 
         // Update statistics
         function updateStats() {
+            // Compute stats relative to the currently filtered view so numbers reflect what the user is studying
+            const scope = filteredProblems && filteredProblems.length ? filteredProblems : problems;
             const stats = {
-                pass: Object.values(problemStats).filter(s => s.status === 'passed').length,
-                fail: Object.values(problemStats).filter(s => s.status === 'failed').length,
-                flagged: flaggedProblems.size,
-                attempted: Object.values(problemStats).filter(s => s.status !== 'unanswered').length
+                pass: scope.filter(p => problemStats[p.id] && problemStats[p.id].status === 'passed').length,
+                fail: scope.filter(p => problemStats[p.id] && problemStats[p.id].status === 'failed').length,
+                flagged: scope.filter(p => flaggedProblems.has(p.id)).length,
+                attempted: scope.filter(p => problemStats[p.id] && problemStats[p.id].status !== 'unanswered').length
             };
 
             document.getElementById('passCount').textContent = stats.pass;
@@ -1374,6 +1384,133 @@
                 currentIndex++;
                 updateView();
             }
+        }
+
+        // Load High-Yield Pack from markdown
+        async function loadHighYield() {
+            try {
+                const response = await fetch('MIDTERM_PRACTICE_HIGH_YIELD.md');
+                if (!response.ok) {
+                    showToast('Unable to load high-yield pack (not found)');
+                    return;
+                }
+                const md = await response.text();
+                const hyProblems = parseHighYieldMarkdown(md);
+                if (!hyProblems.length) {
+                    showToast('No high-yield problems found in file');
+                    return;
+                }
+
+                // Add problemStats entries for these problems if not present
+                hyProblems.forEach(p => {
+                    if (!problemStats[p.id]) {
+                        problemStats[p.id] = { status: 'unanswered', flagged: false };
+                    }
+                });
+
+                filteredProblems = hyProblems;
+                currentIndex = 0;
+                currentFilter = 'highyield';
+                // Update active filter button UI
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                const highBtn = document.getElementById('highYieldBtn');
+                if (highBtn) highBtn.classList.add('active');
+                updateView();
+                showToast('⭐ High-Yield pack loaded');
+                // Update header text to reflect the high-yield pack
+                const headerText = document.querySelector('.header p');
+                if (headerText) headerText.textContent = 'High-Yield Pack — condensed practice (quick review)';
+            } catch (e) {
+                console.error('Error loading high-yield pack:', e);
+                showToast('Error loading high-yield pack');
+            }
+        }
+
+        // Return to full set
+        function showAllProblems() {
+            filteredProblems = [...problems];
+            currentFilter = 'all';
+            currentIndex = 0;
+            updateView();
+            showToast('Returned to full problem set');
+            // Revert header text
+            const headerText2 = document.querySelector('.header p');
+            if (headerText2) headerText2.textContent = 'Midterm 2 Exam Preparation - 230 Practice Problems';
+            // Update active button UI
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            const fullBtn = document.getElementById('btnFullSet');
+            if (fullBtn) fullBtn.classList.add('active');
+        }
+
+        // Simple parser for the high-yield markdown file
+        function parseHighYieldMarkdown(md) {
+            // Split by numbered headings like '1) ', '2) ' (match at line start)
+            const parts = md.split(/\n(?=\d+\)\s)/g);
+            const results = [];
+            let baseId = 1001; // High-yield unique id starting point
+
+            // Flexible regex for identifying solution separators. Matches common forms:
+            // - '\nSolution:'
+            // - '\n**Solution:**'
+            // - '\nAnswer:' or '\n**Answer**:'
+            const solutionSplitRegex = /\n\s(?:\*{0,2})\s*(?:Solution|Solutions|Answer|Answer:)\s*[:.-]*\s*(\n|$)/i;
+            // Note: we will search for a simpler pattern (case-insensitive) that covers these cases
+            const solutionFindRegex = /(?:\n|^)\s*(?:\*{0,2})\s*(?:Solution|Solutions|Answer)\s*[:.-]*\s*/i;
+
+            for (let i = 0; i < parts.length; i++) {
+                const part = parts[i].trim();
+                if (!part) continue;
+                // Split lines and pick the first line as header/title, otherwise fallback
+                const lines = part.split('\n');
+                const header = lines[0] || '';
+                let title = '';
+                let m = header.match(/^\s*\d+\)\s*(.*)$/);
+                if (m) title = m[1].trim();
+                else {
+                    const headerMatch = header.match(/###\s+Problem\s*\d+\s*:?\s*(.*)/);
+                    title = headerMatch ? headerMatch[1].trim() : header.replace('###', '').trim();
+                }
+
+                // Try to find a solution marker within the part using a tolerant regex
+                const solMatch = part.search(solutionFindRegex);
+                let content = '';
+                let solution = '';
+                if (solMatch !== -1 && solMatch < part.length) {
+                    content = part.substring(header.length, solMatch).trim();
+                    // Extract solution portion (everything after the match)
+                    solution = part.substring(solMatch).replace(solutionFindRegex, '').trim();
+                } else {
+                    // Fallbacks: look for code blocks, or 'Solution:' within the line without newline
+                    const codeBlockMatch = part.match(/```[\s\S]*?```/g);
+                    if (codeBlockMatch && codeBlockMatch.length) {
+                        solution = codeBlockMatch[0].replace(/```/g, '').trim();
+                        content = part.replace(codeBlockMatch[0], '').replace(header, '').trim();
+                    } else {
+                        // No explicit solution found - check if the word 'Solution' exists anywhere
+                        const inlineSol = part.match(/(?:Solution|Answer)\s*[:.-]/i);
+                        if (inlineSol) {
+                            // split on the first occurrence
+                            const idx = part.indexOf(inlineSol[0]);
+                            content = part.substring(header.length, idx).trim();
+                            solution = part.substring(idx).replace(inlineSol[0], '').trim();
+                        } else {
+                            // No solution - remainder is content
+                            content = part.replace(header, '').trim();
+                        }
+                    }
+                }
+
+                const problemObj = {
+                    id: baseId + i,
+                    section: 'High-Yield Pack',
+                    title: title || `High-Yield Problem ${i+1}`,
+                    content: content || '—',
+                    solution: solution || '—'
+                };
+                results.push(problemObj);
+            }
+
+            return results;
         }
 
         // Show completion

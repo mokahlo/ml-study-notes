@@ -337,3 +337,157 @@ For more practice:
 3. Try explaining concepts to a study partner
 4. Draw network architectures and trace calculations
 
+**High-yield pack**: If you have limited time, use the condensed high-yield practice set we prepared: `MIDTERM_PRACTICE_HIGH_YIELD.md` (recommended start for quick revision).
+
+---
+
+## Problem Set X: Professor's Sample Midterm (Practice)
+
+This section pulls representative problems and solutions from the professor's Sample Midterm Exam (Fall 2025). Use these as direct practice items.
+
+### Problem X.1: Forward Pass of a Neuron (Q1)
+**Given:**
+- Input: x = 2.0
+- Weight: w = 0.5
+- Bias: b = -0.3
+- Activation: Sigmoid f(z) = 1 / (1 + e^-z)
+
+**Questions:**
+1. Compute z and ŷ (hat y) for the neuron.
+2. If the target is y = 0.8, compute squared loss J = (1/2)(ŷ - y)^2.
+
+**Solution:**
+```
+z = w * x + b = 0.5 * 2.0 + (-0.3) = 1.0 - 0.3 = 0.7
+ŷ = sigmoid(0.7) = 1 / (1 + e^-0.7) ≈ 0.6681878 ≈ 0.67
+Loss J = 0.5 × (ŷ - y)^2 = 0.5 × (0.6681878 - 0.8)^2
+                         = 0.5 × (-0.1318122)^2 ≈ 0.5 × 0.01737 ≈ 0.008685
+```
+
+---
+
+### Problem X.2: Convolution Output Dimensions (Q2)
+**Given:** A 6×6 image convolved with a 3×3 filter, stride S = 2, padding P = 0.
+
+**Question:** What is the output size?
+
+**Solution:**
+```
+Output (per dimension) = floor((W - F + 2P) / S) + 1
+= floor((6 - 3 + 0) / 2) + 1 = floor(3/2) + 1 = 1 + 1 = 2
+Output size = 2 × 2
+```
+
+---
+
+### Problem X.3: PCA and Feature Scaling (Q3)
+**Given:** Features with very different scales (e.g., Energy use up to 10,000 vs. occupancy rate 0–100).
+
+**Question:** Why does PCA often require standardization? What happens if we don't standardize?
+
+**Solution:**
+```
+PCA finds directions of maximum variance. If features have different numeric ranges, those
+with larger magnitude will dominate variance and therefore dominate the PCA directions.
+Standardizing (zero mean, unit variance) removes scale effects and allows PCA to reflect
+variance across features on equal footing.
+```
+
+---
+
+### Problem X.4: SVM Decision Boundary (Q4)
+**Given:** Linear decision function f(x) = 3x1 - 4x2 + 2.
+
+**Question:** For the point (x1, x2) = (2, 1), determine which side of the boundary the point lies on.
+
+**Solution:**
+```
+f(2,1) = 3 * 2 - 4 * 1 + 2 = 6 - 4 + 2 = 4 > 0 → point lies on the positive side of the boundary.
+```
+
+---
+
+### Problem X.5: Decision Tree Entropy (Q5)
+**Given:** A binary class distribution: Yes = 6, No = 2 (total N = 8).
+
+**Question:** Compute the entropy before splitting (base 2) and show the steps.
+
+**Solution:**
+```
+p_yes = 6 / 8 = 0.75
+p_no = 2 / 8 = 0.25
+H = -(0.75 log2 0.75 + 0.25 log2 0.25)
+        ≈ -(0.75 * -0.4150 + 0.25 * -2)
+        ≈ -( -0.3113 - 0.5 ) = 0.8113
+```
+
+---
+
+### Problem X.6: True/False Concept Check (Q6)
+**Statements:**
+1. Increasing the number of filters in a CNN layer decreases the feature map depth. (T/F)
+2. The sigmoid activation outputs values between -1 and 1. (T/F)
+3. PCA’s first principal component captures maximum variance in the data. (T/F)
+4. Increasing the learning rate always speeds convergence. (T/F)
+
+**Answers & Notes:**
+```
+1. False — increasing the number of filters increases (or can increase) the output feature map depth.
+2. False — sigmoid outputs are in (0, 1); tanh gives (-1, 1).
+3. True — the first principal component maximizes variance.
+4. False — larger learning rates can speed early progress but may overshoot and diverge.
+```
+
+---
+
+### Problem X.7: Transformers — Short Answer (Q7)
+**Questions (short answer):**
+1. What does the attention mechanism do?
+2. What is the role of the position-wise feed-forward network (FFN) inside a Transformer layer?
+
+**Solutions:**
+```
+1. Attention allows each token to weight the importance of other tokens in the sequence, aggregating
+         context adaptively (which words are most relevant for each position).
+2. The FFN provides a position-wise non-linear projection to increase model capacity and refine
+         token representations after the self-attention aggregation.
+```
+
+---
+
+### Problem X.8: CNN Filter Computation with Stride (Q8)
+**Given:** 4×4 input X and 2×2 kernel K, stride = 2, bias b = 1.
+X = [[1,2,3,0], [0,1,2,3], [3,1,0,2], [2,0,1,1]]
+K = [[1, 0], [-1, 1]]
+
+**Question:** Compute the 2×2 output feature map with given stride and bias.
+
+**Solution:**
+```
+Output size = ((4 - 2) / 2) + 1 = ((2)/2) + 1 = 1 + 1 = 2 -> 2×2
+
+Top-left patch: X[0:2,0:2] = [[1,2],[0,1]]
+dot = 1*1 + 2*0 + 0*(-1) + 1*1 = 1 + 0 + 0 + 1 = 2 -> +b=1 => out(0,0)=3
+
+Top-right patch: X[0:2,2:4] = [[3,0],[2,3]]
+dot = 3*1 + 0*0 + 2*(-1) + 3*1 = 3 + 0 -2 + 3 = 4 -> +b=1 => out(0,1)=5
+
+Bottom-left patch: X[2:4,0:2] = [[3,1],[2,0]]
+dot = 3*1 + 1*0 + 2*(-1) + 0*1 = 3 + 0 -2 + 0 = 1 -> +b=1 => out(1,0)=2
+
+Bottom-right patch: X[2:4,2:4] = [[0,2],[1,1]]
+dot = 0*1 + 2*0 + 1*(-1) + 1*1 = -1 + 1 = 0 -> +b=1 => out(1,1)=1
+
+Output feature map:
+[[3, 5],
+ [2, 1]]
+```
+
+---
+
+Notes:
+- These sample problems mirror the actual midterm-style questions and their solutions. They make good practice items. If you want, I can:
+        - Convert these to a separate PDF or printable worksheet.
+        - Add unit tests or small auto-graded exercises (e.g., in a notebook).
+        - Insert more variations and random parameterized problems for practice.
+
